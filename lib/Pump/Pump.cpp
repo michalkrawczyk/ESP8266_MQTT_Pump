@@ -17,6 +17,7 @@ namespace water_pump
     void PumpController::initPump()
     {
         pinMode(_pwm_pin, OUTPUT);
+
         #ifdef DEBUG
             Serial.print("Pump inited at pin: ");
             Serial.println(_pwm_pin);
@@ -28,14 +29,20 @@ namespace water_pump
         level = (level > 0.0) ? level : 0.0;
         level = (level < 100.0) ? level : 100.0;
 
-        if (level != _current_level)
+        uint8_t new_level(0U);
+
+        if (level != 0.0)
         {
-            uint8_t calculated_value = static_cast<uint8_t>(
-                level * (_max_val - _min_val) + _min_val
-            );
-            analogWrite(_pwm_pin, calculated_value);
-            _current_level = static_cast<uint8_t>(level);
+            new_level = static_cast<uint8_t>(
+                (level * (_max_val - _min_val)) / 100 + _min_val);
         }
+
+        if (new_level != _current_level)
+        {
+            analogWrite(_pwm_pin, new_level);
+            _current_level = new_level;
+        }
+        
 
         #ifdef DEBUG
             Serial.print("Power set to: ");

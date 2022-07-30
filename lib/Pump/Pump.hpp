@@ -16,6 +16,12 @@ public:
 
     void setOutputPower(float level);
     void setOutputPower(uint8_t level);
+
+    // TODO: think about getters for letting know system about change
+    // ANSWEAR: Probably unnecessary - In this project, it's enough to just receive data, and letting know about errors
+    // float getPowerPercantage();
+    // uint8_t getMinValue();
+    // uint8_t getMaxValue();
     
 private:
     uint8_t _pwm_pin, _min_val, _max_val;
