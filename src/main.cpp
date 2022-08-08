@@ -3,8 +3,9 @@
 #include "Pump.hpp"
 
 #define CONN_LED D4
+#define PUMP_PIN D1
 
-water_pump::PumpController pump(D1, 170, 255); // 8-12V Range for 12V Pump
+water_pump::PumpController pump(PUMP_PIN, 170, 255); // 8-12V Range for 12V Pump
 
 void setup() {
   // put your setup code here, to run once:
