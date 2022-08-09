@@ -10,6 +10,7 @@ namespace water_pump
     PumpController::PumpController(const uint8_t &pwm_pin, const uint8_t &min_value, const uint8_t &max_value):
     _pwm_pin(pwm_pin), _min_val(min_value), _max_val(max_value) 
     {
+        // Check if provided settings are valid
         assert(min_value <= max_value && "PumpController: minimum value is bigger than maximum");
         assert(min_value >= 0 && "PumpController: Minimum should be in range (0-255)");
         assert(max_value <= 255 && "PumpController: Maximum should be in range (0-255)");
@@ -17,6 +18,7 @@ namespace water_pump
 
     void PumpController::initPump()
     {
+        /** @brief Initialize Pin for pump and set initial state */
         pinMode(_pwm_pin, OUTPUT);
 
         #ifdef DEBUG
@@ -30,6 +32,10 @@ namespace water_pump
 
     void PumpController::setOutputPower(float level)
     {
+        /** @brief  Set power on pump. 
+         * @param level - Output power (0 - 100%)
+         */
+
         level = (level > 0.0) ? level : 0.0;
         level = (level < 100.0) ? level : 100.0;
 
@@ -59,31 +65,13 @@ namespace water_pump
         #endif //WATCHDOG
     }
 
-    void PumpController::setOutputPower(uint8_t level)
-    {
-        level = (level >= _min_val) ? level : 0U; // Turn off when below minimum level
-        level = (level < _max_val) ? level : _max_val;
-
-        if (level != _current_level)
-        {
-            analogWrite(_pwm_pin, level);
-            _current_level = level;
-        }
-
-        #ifdef DEBUG
-            float new_level = ((level - _min_val) / (_max_val - _min_val)) * 100.0;
-            Serial.print("Power set to: ");
-            Serial.print(new_level);
-            Serial.println('%');
-        #endif //DEBUG
-
-        #ifdef WATCHDOG
-            ESP.wdtFeed();
-        #endif //WATCHDOG
-    }
-
     void PumpController::setPowerForPeriod(float level, unsigned long ms)
     {
+        /** @brief  Set power on pump for given period. 
+         * @param level - Output power (0 - 100%)
+         * @param ms - Time of action in miliseconds
+         */
+
         unsigned long begin_time = millis();
         unsigned long current_time = millis();
 
@@ -98,6 +86,6 @@ namespace water_pump
             current_time = millis();
         }
 
-        analogWrite(_pwm_pin, 0);
+        setOutputPower(0U);
     }
 }
