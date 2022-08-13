@@ -3,8 +3,6 @@
 #include "Arduino.h"
 #include <cassert>
 
-#define WATCHDOG 1
-
 namespace water_pump
 {
     PumpController::PumpController(const uint8_t &pwm_pin, const uint8_t &min_value, const uint8_t &max_value):
@@ -60,9 +58,9 @@ namespace water_pump
             Serial.println('%');
         #endif //DEBUG
 
-        #ifdef WATCHDOG
+        #ifdef WDT_ENABLED
             ESP.wdtFeed();
-        #endif //WATCHDOG
+        #endif //WDT_ENABLED
     }
 
     void PumpController::setPowerForPeriod(float level, unsigned long ms)
@@ -79,9 +77,11 @@ namespace water_pump
 
         while (begin_time - current_time >= ms)
         {
-            #ifdef WATCHDOG
+            #ifdef WDT_ENABLED
+
                 ESP.wdtFeed();
-            #endif //WATCHDOG
+            #endif //WDT_ENABLED
+
 
             current_time = millis();
         }
