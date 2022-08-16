@@ -44,6 +44,12 @@ namespace water_pump
             new_level = static_cast<uint8_t>(
                 (level * (_max_val - _min_val)) / 100 + _min_val);
         }
+        else
+        {
+            // Set blocade only if level 0.0
+            // Enable this way to change power during setPowerForPeriod if considered too high/low
+            _pump_block_flag = 1U; 
+        }
 
         if (new_level != _current_level)
         {
@@ -69,13 +75,19 @@ namespace water_pump
          * @param level - Output power (0 - 100%)
          * @param ms - Time of action in miliseconds
          */
+        #ifdef DEBUG
+            Serial.print("Periodic pump - time: ");
+            Serial.println(ms);
+        #endif //DEBUG
+
+        _pump_block_flag = 0U;
 
         unsigned long begin_time = millis();
-        unsigned long current_time = millis();
 
         setOutputPower(level);
 
-        while (begin_time - current_time >= ms)
+        unsigned long current_time = millis();
+        while (current_time - begin_time >= ms && !_pump_block_flag)
         {
             #ifdef WDT_ENABLED
 
@@ -87,5 +99,6 @@ namespace water_pump
         }
 
         setOutputPower(0U);
+        _pump_block_flag = 1U; //set pump flag - on internal callback it will end outer loop
     }
 }

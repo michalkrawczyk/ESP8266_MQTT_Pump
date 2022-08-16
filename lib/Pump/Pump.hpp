@@ -17,12 +17,12 @@ public:
     void initPump();
 
     void setOutputPower(float level);
-
     void setPowerForPeriod(float level, unsigned long ms);
     
 private:
     uint8_t _pwm_pin, _min_val, _max_val;
     uint8_t _current_level{0};
+    uint8_t _pump_block_flag{0};
 };
 
 #endif  //PUMP_HPP
