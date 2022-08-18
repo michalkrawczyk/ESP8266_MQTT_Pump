@@ -4,3 +4,5 @@
 .vscode/launch.json
 .vscode/ipch
 include/Network_Settings.h
+.vscode
+include/README
