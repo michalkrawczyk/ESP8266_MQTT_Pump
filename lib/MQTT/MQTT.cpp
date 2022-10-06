@@ -6,23 +6,15 @@
 //TODO: WILL (https://learn.adafruit.com/mqtt-adafruit-io-and-you/qos-and-wills)
 //TODO: command to go to sleep bitch (for given time) - for power saving
 
+//TODO: IDEA_1: Callback for processing message inside class, pointer for doing activities in main (registered in class function)
+// std::function or simple void pointer?
+
 /************************************************
  *  Callback
  ***********************************************/
 #include "Pump.hpp"
 
-    static void sub_callback(char *data, uint16_t len)
-    {
-        
-        #ifdef DEBUG
-            Serial.print("Message received: ");
-            Serial.println(data);
-        #endif
-
-        //TODO: Processing Message
-    }
-
- /***********************************************/
+extern void sub_callback(char *data, uint16_t len);
 
 static std::string feedToString(const std::string &feed_name);
 
@@ -65,10 +57,11 @@ namespace connection{
             //1 and 3 have STA enabled - According to Wifi.waitForConnectResult()
             // if((wifi_get_opmode() & 1) == 0) 
             // {
-                WiFi.enableSTA(true); 
+            //     WiFi.enableSTA(true); 
             //     delay(10);
             // }
-
+            WiFi.enableSTA(true); 
+            delay(10);
             WiFi.mode(WIFI_STA);
             delay(10);
             
@@ -214,10 +207,10 @@ namespace connection{
             return _k_device_id == device_id;
         }
 
-        const std::string MqttListenDevice::getLastMsg() const
-        {
-            return _last_msg;
-        }
+        // const std::string MqttListenDevice::getLastMsg() const
+        // {
+        //     return _last_msg;
+        // }
     } //inline namespace Esp
 
 }//namespace Connection

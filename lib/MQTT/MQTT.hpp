@@ -73,11 +73,11 @@ class connection::Esp::MqttListenDevice final
 
         bool retainConnection();
         const bool compareID(const uint8_t &device_id) const;
-        const std::string getLastMsg() const;
+        // const std::string getLastMsg() const;
 
     private:
         const uint8_t _k_device_id;
-        std::string _last_msg;
+        // std::string _last_msg;
         
         Adafruit_MQTT_Publish _error_feed{&mqtt, IO_USER IO_ERROR_FEED};
         Adafruit_MQTT_Subscribe _listen_feed;
