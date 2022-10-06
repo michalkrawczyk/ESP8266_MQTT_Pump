@@ -98,9 +98,10 @@ namespace rtc
     void RtcMem::deepSleepErr(const ErrorCode &error_code, const uint64_t time_us)
     {
         #ifdef DEBUG
+            double time_ms = time_us / 1000;
             Serial.print("Going to sleep: ");
-            Serial.print(time_us);
-            Serial.println("us");
+            Serial.print(time_ms);
+            Serial.println("ms");
         #endif //DEBUG
 
         rtc_data.last_error = error_code;
