@@ -63,10 +63,6 @@ namespace water_pump
             Serial.print(level);
             Serial.println('%');
         #endif //DEBUG
-
-        #ifdef WDT_ENABLED
-            ESP.wdtFeed();
-        #endif //WDT_ENABLED
     }
 
     void PumpController::setPowerForPeriod(float level, unsigned long ms)
@@ -86,16 +82,10 @@ namespace water_pump
 
         setOutputPower(level);
 
-        unsigned long current_time = millis();
-        while (current_time - begin_time >= ms && !_pump_block_flag)
+        while ((millis() - begin_time) < ms && !_pump_block_flag)
         {
-            #ifdef WDT_ENABLED
-
-                ESP.wdtFeed();
-            #endif //WDT_ENABLED
-
-
-            current_time = millis();
+            // yield to keep WDT and scheduled tasks (including retaining wifi)
+            yield();
         }
 
         setOutputPower(0U);
