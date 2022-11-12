@@ -1,52 +1,18 @@
+#include "MessageProcessing.hpp"
 
 #include <sstream>
 
-#include "MessageProcessing.hpp"
-
 namespace msg_processing
 {
-  Message msg_processing::extractFloatMessage(std::string s) {
-    /**
-     * @brief  Extract float message from string
-     * @param s - string containing number
-     * 
-     * @return Message struct with params:
-     *  - value - float number
-     *  - is_valid - information if string contains valid float number
-     */
-      std::istringstream iss(s);
-      
-      Message msg;
-
-      iss >> std::noskipws >> msg.value;
-
-      msg.is_valid = iss && iss.eof();
-
-      return msg;
-  }
-
-  // template < typename T > std::string to_string(const T &n)
-  // {
-  //       std::ostringstream oss ;
-  //       oss << n ;
-  //       return oss.str() ;
-  // }
-
-  int stringToInt(std::string s)
+  uint64_t calculateTimeMs(uint8_t h, uint8_t m, uint8_t s)
   {
-    /**
-     * @brief  convert number in std::string to integer (due to mingw issue)
-     * @param s - string containing number
-     * 
-     * @return extracted integer value if convertion was valid. Otherwise -1
-     */
-    std::istringstream iss(s);
-      
-      int num;
+    uint64_t total_time {0};
 
-      iss >> num;
+    total_time += h * 3600000;
+    total_time += m * 60000;
+    total_time += s * 1000;
 
-      return (iss && iss.eof()) ? num : -1;
+    return total_time;
   }
 } // namespace msg_processing
 

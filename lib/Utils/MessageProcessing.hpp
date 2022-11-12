@@ -5,19 +5,15 @@
 
 namespace msg_processing
 {
-    struct Message;
-    Message extractFloatMessage(std::string s);
-    // uint64_t getTimeFromString(std::string s);
-
-    // template <typename T> std::string to_string(const T &n);
-    int stringToInt(std::string s);
+    // struct Message;
+    uint64_t calculateTimeMs(uint8_t h = 0, uint8_t m = 0, uint8_t s = 0);
 }
 
-struct msg_processing::Message
-{
-    float value;
-    bool is_valid;
-};
+// struct msg_processing::Message
+// {
+//     float value;
+//     bool is_valid;
+// };
 
 
 #endif  //UTILS_HPP
