@@ -1,10 +1,6 @@
 #ifndef MQTT_H
 #define MQTT_H
 
-
-/************************************************
- *  Libraries
- ***********************************************/
 #include "Network_Settings.h" // this file contains Network and MQTT Setup Settings
 /* Note: That file includes: 
 *(#define) WLAN_SSID, WLAN_PASS, IO_SERVER, IO_PORT, IO_USER, IO_KEY, IO_ERROR_FEED
@@ -25,7 +21,6 @@
 #ifndef uint8_t
 #include <stdint.h>  //has also uint16_t and uint32_t
 #endif  //uint8_t
- /***********************************************/
 
 namespace connection
 {
@@ -60,6 +55,10 @@ enum class connection::SignalCode : uint8_t
     UNKNOWN_ERROR
 
 };
+
+/************************************************
+ *  ESP8266 Version for MQTT Listening Device
+ ***********************************************/
 
 #ifdef ESP8266
 

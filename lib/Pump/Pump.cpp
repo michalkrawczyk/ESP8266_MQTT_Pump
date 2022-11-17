@@ -34,6 +34,7 @@ namespace water_pump
          * @param level - Output power (0 - 100%)
          */
 
+        // Clamp data to be in range 0 - 100%
         level = (level > 0.0) ? level : 0.0;
         level = (level < 100.0) ? level : 100.0;
 
@@ -41,6 +42,7 @@ namespace water_pump
 
         if (level != 0.0)
         {
+            // Calculate new output power
             new_level = static_cast<uint8_t>(
                 (level * (_max_val - _min_val)) / 100 + _min_val);
         }

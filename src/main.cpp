@@ -5,20 +5,12 @@
 #include "RTC.hpp"
 #include "MessageProcessing.hpp"
 
-#include <cassert>
 #include <stdio.h>
-#include <inttypes.h>
-
-//TODO: sub_callback (cmd == "slp")
 
 //TODO: Switch dev_id to string?
 
-
-
 #define CONN_LED D4
 #define PUMP_PIN D1
-
-#define SHORT_DURATION 1
 
 using RtcErr = rtc::ErrorCode;
 
@@ -28,6 +20,9 @@ connection::MqttListenDevice dev(5, "feeds/test");
 
 void sub_callback(char *data, uint16_t len)
 {
+  /* @brief: Subcribe Callback on received message
+      for performing actions if message is valid and addresed for this device
+  */
   #ifdef DEBUG
     Serial.print("Message received: ");
     Serial.println(data);
@@ -41,7 +36,7 @@ void sub_callback(char *data, uint16_t len)
 
   int dev_id {-1};
   sscanf(data, "%3i%*1s", &dev_id);
-  // int dev_id = msg_processing::stringToInt(std::string(data, data + pos));
+
   if (!dev.compareID(dev_id))
   {
     // dev_id should be still -1 if sscanf fails
@@ -57,8 +52,6 @@ void sub_callback(char *data, uint16_t len)
     pos++;
   }
 
-  // sscanf(data, "%d%*c%3[a-z]s",) == 4;
-
   if((len - pos - 1) < 4)
   {
     // ((len - pos - 1) < 4) -> at least 4 chars for command and value
@@ -70,6 +63,7 @@ void sub_callback(char *data, uint16_t len)
     return;
   }
 
+  // Store command and value in strings for easier processing
   std::string cmd(data + (pos + 1), data + (pos + 4));
   std::string val(data + (pos + 4), data + len);
 
@@ -83,28 +77,29 @@ void sub_callback(char *data, uint16_t len)
    
   if (cmd == "set")
   {
-
+    // Set Output Value
     unsigned short int h{0U}, m{0U}, s{0U};
     uint8_t res;
     float msg_value{0.0F};
 
     #ifdef SHORT_DURATION
-      // 6 chars for float, 2x2 unsigned short int after 't'
+      // 6 chars for float, 2x2 unsigned short int after 't' (mm:ss)
       res = sscanf(val.c_str(), "%6ft%2hu:%2hu", &msg_value, &m, &s);
     #else
-      // 6 chars for float, 3x2 unsigned short int after 't'
+      // 6 chars for float, 3x2 unsigned short int after 't' (hh:mm:ss)
       res = sscanf(val.c_str(), "%6ft%2hu:%2hu:%2hu",  &msg_value, &h, &m, &s);
     #endif
 
     if (res == 1)
     {
+      // Time not found - set only value
       pump.setOutputPower(msg_value);
     }
     else if (res > 2)
     {
       time_ms = msg_processing::calculateTimeMs(h, m, s);
       #ifdef DEBUG
-        Serial.print("Time");
+        Serial.print("Time:");
         Serial.println(long(time_ms));
       #endif
 
@@ -114,14 +109,22 @@ void sub_callback(char *data, uint16_t len)
   }
   else if (cmd == "slp")
   {
+    // Sleep
     unsigned short int h{0}, m{0}, s{0};
 
     if (sscanf(val.c_str(), "%hu:%2hu:%2hu", &h, &m, &s) == 3)
     {
+      // format hh:mm:ss
+      // go to deep sleep for given time
       time_ms = msg_processing::calculateTimeMs(h, m, s);
 
-      //TODO: Sleep
+      RTC.deepSleep(time_ms * 1000);
     }
+  }
+  else
+  {
+    // Inform about invalid message
+    dev.sendError(connection::SignalCode::BAD_PAYLOAD);
   }
 
 }
@@ -150,7 +153,10 @@ void setup() {
     digitalWrite(CONN_LED, HIGH);
   }
 
-  Serial.println("Connected");
+  #ifdef DEBUG
+    Serial.println("Connected");
+  #endif //DEBUG
+  
   dev.init();
 
   connection::connectMQTT(); //TODO: Think about block till connect
@@ -161,6 +167,7 @@ void setup() {
     RTC.deepSleepErr(RtcErr::MQTT_PUB_FAIL);
   }
 
+  digitalWrite(CONN_LED, HIGH);
 }
 
 void loop() {
@@ -173,13 +180,18 @@ void loop() {
 
   if(connection::connectMQTT(3))
   {
-    connection::mqtt.processPackets(30000UL); //wait 30 s
+    // wait on listening for 30 s
+    connection::mqtt.processPackets(30000UL); 
     dev.retainConnection(); //TODO: Think about sleep
   }
   else
   {
     // MQTT Connection Broken
-    Serial.println("No mqtt");
-    // RTC.deepSleepErr(RtcErr::NO_MQTT);
+
+    #ifdef DEBUG
+      Serial.println("No mqtt");
+    #endif //DEBUG
+
+    RTC.deepSleepErr(RtcErr::NO_MQTT);
   }
 }

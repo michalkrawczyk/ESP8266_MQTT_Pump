@@ -4,28 +4,37 @@
 #include "RTC.hpp"
 
 //TODO: WILL (https://learn.adafruit.com/mqtt-adafruit-io-and-you/qos-and-wills)
-//TODO: command to go to sleep bitch (for given time) - for power saving
-
-//TODO: IDEA_1: Callback for processing message inside class, pointer for doing activities in main (registered in class function)
-// std::function or simple void pointer?
 
 /************************************************
  *  Callback
  ***********************************************/
+
 #include "Pump.hpp"
 
 extern void sub_callback(char *data, uint16_t len);
 
+
+/************************************************
+ *  Support functions - Declarations & Templates
+ ***********************************************/
+
 static std::string feedToString(const std::string &feed_name);
 
 template <typename T>
-static std::string to_string(const T &n) //Compiler Bug causes not finding std::to_string even in <string>
+static std::string to_string(const T &n)
 {
+    /* @brief: Casting to string
+        Note: Compiler Bug causes not finding std::to_string even in <string>
+    */
     std::ostringstream out_stream ;
     out_stream<< n ;
 
     return out_stream.str() ;
 }
+
+/************************************************
+ *  MQTT & WiFi Connection
+ ***********************************************/
 
 namespace connection{
     extern WiFiClient client{};
@@ -42,6 +51,8 @@ namespace connection{
     {
         void initWiFi()
         {
+            // @brief: Init Wifi Connection
+
             #ifdef DEBUG
                 Serial.println("Connecting with Network");
             #endif// DEBUG
@@ -88,9 +99,9 @@ namespace connection{
 
         bool checkWiFiConn(uint8_t max_retries)
         {
+            // @brief: Check WiFi connection and reconnect if disconnected
             while(WiFi.status() != WL_CONNECTED && max_retries--)
             {
-                // yield();
                 delay(100);
 
                 #ifdef DEBUG
@@ -168,12 +179,16 @@ namespace connection{
 
         void MqttListenDevice::init()
         {
+            // @brief: Init Device - Subscribe channel and init callbacks
             _listen_feed.setCallback(sub_callback);
             mqtt.subscribe(&_listen_feed);
         }
 
         bool MqttListenDevice::sendError(const SignalCode &err_code)
         {
+            /* @brief: Send information about error to broker (to predefined channel)
+                @param err_code - Error code to send (defined in MQTT.hpp)
+            */
             
             std::string msg(to_string(static_cast<int>(_k_device_id)));
             //TODO: ADD KEY HERE
@@ -187,11 +202,15 @@ namespace connection{
 
         bool MqttListenDevice::sendAckMsg()
         {
+            // @brief: Send SignalCode::NO_ERROR as ACK message
             return sendError(SignalCode::NO_ERROR);
         }
 
         bool MqttListenDevice::retainConnection()
         {
+            /* @brief: Ping to retain connection.
+                If unable to ping - disconnect to enable reconnection
+            */
             bool result(false);
 
             if (!(result = mqtt.ping()))
@@ -204,6 +223,7 @@ namespace connection{
 
         const bool MqttListenDevice::compareID(const uint8_t &device_id) const
         {
+            // @brief: Device ID validation
             return _k_device_id == device_id;
         }
 
@@ -215,9 +235,15 @@ namespace connection{
 
 }//namespace Connection
 #endif //ifdef ESP8266
+
+
+/************************************************
+ *  Support functions - Definitions
+ ***********************************************/
     
 static std::string feedToString(const std::string &feed_name)
 {
+    // @brief: Prepare feed channel
     if(!feed_name.empty() && feed_name[0] == '/')
     {
         return std::string(IO_USER + feed_name);
