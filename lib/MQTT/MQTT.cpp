@@ -3,7 +3,6 @@
 #include <sstream>
 #include "RTC.hpp"
 
-//TODO: WILL (https://learn.adafruit.com/mqtt-adafruit-io-and-you/qos-and-wills)
 
 /************************************************
  *  Callback
@@ -154,10 +153,6 @@ namespace connection{
                 Serial.println("Retrying MQTT connection in 5 seconds...");
                 mqtt.disconnect();
 
-                #ifdef WDT_ENABLED
-                    ESP.wdtFeed(); //feed to avoid reseting during reconnect
-                #endif //WDT_ENABLED
-
                 delay(5000);
                 retries--;
                 
@@ -181,7 +176,14 @@ namespace connection{
         {
             // @brief: Init Device - Subscribe channel and init callbacks
             _listen_feed.setCallback(sub_callback);
-            mqtt.subscribe(&_listen_feed);
+            
+            if (!mqtt.subscribe(&_listen_feed))
+            {
+                RTC.deepSleepErr(rtc::ErrorCode::MQTT_SUB_FAIL);
+            }
+
+            // Last Will in case of error on device
+            mqtt.will(IO_ERROR_FEED, "-1");
         }
 
         bool MqttListenDevice::sendError(const SignalCode &err_code)
