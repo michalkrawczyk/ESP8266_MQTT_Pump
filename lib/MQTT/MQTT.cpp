@@ -59,8 +59,9 @@ namespace connection{
 
             if(!WiFi.forceSleepWake())
             {
+                // Wake wi-fi modem if was off after sleep
                 wifi_station_connect();
-            } //Avoiding issue when esp not always connect with WiFi
+            } 
 
             delay(1);
 
@@ -79,7 +80,7 @@ namespace connection{
 
             // IPAddress ip(IP_ADDR), gateway(GATEWAY_ADDR), subnet(SUBNET_ADDR);
             // WiFi.config(ip, gateway, subnet);
-            // Something is wrong with WiFi config - despite same id, network not working properly
+            // Issue with WiFi config - despite same id, network not working properly
 
             if(RTC.isValid())             
             {
@@ -119,15 +120,14 @@ namespace connection{
                 Serial.println("Fast Connect Failed - Try normal");
             #endif// DEBUG
 
+            // Unable to reconnect - Reset connection and radio
             WiFi.disconnect();
             delay(10);
             WiFi.forceSleepBegin();
             delay(10);
             WiFi.forceSleepWake();
             delay(10);
-            WiFi.begin(WLAN_SSID, WLAN_PASS);
-            
-            WiFi.printDiag(Serial);
+            WiFi.begin(WLAN_SSID, WLAN_PASS);           
 
             return WiFi.waitForConnectResult(6000) == WL_CONNECTED;
         }
