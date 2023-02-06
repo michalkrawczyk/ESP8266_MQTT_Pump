@@ -14,7 +14,7 @@
 
 using RtcErr = rtc::ErrorCode;
 
-water_pump::PumpController pump(PUMP_PIN, 170, 255); // 8-12V Range for 12V Pump
+water_pump::PumpController pump(PUMP_PIN, 682U, 1023U); // 8-12V Range for 12V Pump
 connection::MqttListenDevice dev(5, "feeds/test");
 
 

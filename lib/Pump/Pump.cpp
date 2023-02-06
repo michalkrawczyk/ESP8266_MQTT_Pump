@@ -5,13 +5,13 @@
 
 namespace water_pump
 {
-    PumpController::PumpController(const uint8_t &pwm_pin, const uint8_t &min_value, const uint8_t &max_value):
+    PumpController::PumpController(const uint8_t &pwm_pin, const out_voltage_t &min_value, const out_voltage_t &max_value):
     _pwm_pin(pwm_pin), _min_val(min_value), _max_val(max_value) 
     {
         // Check if provided settings are valid
         assert(min_value <= max_value && "PumpController: minimum value is bigger than maximum");
-        assert(min_value >= 0 && "PumpController: Minimum should be in range (0-255)");
-        assert(max_value <= 255 && "PumpController: Maximum should be in range (0-255)");
+        assert(min_value >= 0 && "PumpController: Minimum should be in range (0-255 [1023 for esp8266])");
+        assert(max_value <= MAX_OUT_VOLTAGE && "PumpController: Maximum should be in range (0-255 [1023 for esp8266])");
     }
 
     void PumpController::initPump()
@@ -38,12 +38,12 @@ namespace water_pump
         level = (level > 0.0) ? level : 0.0;
         level = (level < 100.0) ? level : 100.0;
 
-        uint8_t new_level(0U);
+        out_voltage_t new_level(0U);
 
         if (level != 0.0)
         {
             // Calculate new output power
-            new_level = static_cast<uint8_t>(
+            new_level = static_cast<out_voltage_t>(
                 (level * (_max_val - _min_val)) / 100 + _min_val);
         }
         else
@@ -64,6 +64,8 @@ namespace water_pump
             Serial.print("Power set to: ");
             Serial.print(level);
             Serial.println('%');
+            Serial.print("Analog value:");
+            Serial.println(_current_level);
         #endif //DEBUG
     }
 
